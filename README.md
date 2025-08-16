@@ -1,7 +1,9 @@
 📅 DayPlan
+
 A beautiful, responsive calendar-style todo application that helps you organize your tasks visually. Built with vanilla JavaScript, HTML, and CSS - no frameworks required!
 
 ✨ Features
+
 🗓️ Calendar Interface
 
 Visual Task Management: See all your tasks displayed directly on calendar dates
