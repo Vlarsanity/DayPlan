@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>DayPlan </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>📅 My Calendar Task Timeline</h1>
+      <div class="header-controls">
+        <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+      </div>
+    </div>
+
+    <!-- Task Input Section -->
+    <div class="input-section">
+      <div class="input-row">
+        <div class="input-group">
+          <label for="taskTitle">Title</label>
+          <input type="text" id="taskTitle" placeholder="Task title" required>
+        </div>
+        <div class="input-group">
+          <label for="taskBody">Description</label>
+          <input type="text" id="taskBody" placeholder="What do you need to do?" required>
+        </div>
+        <div class="input-group">
+          <label for="taskDueDate">Due Date</label>
+          <input type="date" id="taskDueDate" required>
+        </div>
+        <div class="input-group">
+          <label for="taskPriority">Priority</label>
+          <select id="taskPriority">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="taskCategory">Category</label>
+          <select id="taskCategory">
+            <option value="personal">Personal</option>
+            <option value="work">Work</option>
+            <option value="shopping">Shopping</option>
+            <option value="health">Health</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <button onclick="addTask()">Add Task</button>
+        <button class="btn-danger" onclick="clearAll()">Clear All</button>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <h3>🔍 Filter & Sort Tasks</h3>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="statusFilter">Status</label>
+          <select id="statusFilter" onchange="renderCalendar()">
+            <option value="all">All Tasks</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="priorityFilter">Priority</label>
+          <select id="priorityFilter" onchange="renderCalendar()">
+            <option value="all">All Priorities</option>
+            <option value="high">High Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="low">Low Priority</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="categoryFilter">Category</label>
+          <select id="categoryFilter" onchange="renderCalendar()">
+            <option value="all">All Categories</option>
+            <option value="personal">Personal</option>
+            <option value="work">Work</option>
+            <option value="shopping">Shopping</option>
+            <option value="health">Health</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
+      </div>
+    </div>
+
+    <!-- Calendar Navigation -->
+    <div class="calendar-nav">
+      <div class="nav-buttons">
+        <button onclick="previousMonth()">← Previous</button>
+        <button class="today-btn" onclick="goToToday()">Today</button>
+        <button onclick="nextMonth()">Next →</button>
+      </div>
+      <h2 id="currentMonth"></h2>
+    </div>
+
+    <!-- Calendar -->
+    <div class="calendar">
+      <div class="calendar-header">
+        <div class="day-header">Sun</div>
+        <div class="day-header">Mon</div>
+        <div class="day-header">Tue</div>
+        <div class="day-header">Wed</div>
+        <div class="day-header">Thu</div>
+        <div class="day-header">Fri</div>
+        <div class="day-header">Sat</div>
+      </div>
+      <div class="calendar-body" id="calendarBody">
+        <!-- Calendar days will be generated here -->
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number" id="totalCount">0</div>
+          <div class="stat-label">Total Tasks</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="completedCount">0</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="pendingCount">0</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-item overdue-stat">
+          <div class="stat-number" id="overdueCount">0</div>
+          <div class="stat-label">Overdue</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Detail Modal -->
+  <div class="modal" id="taskModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Task Details</h3>
+        <button class="close-modal" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="modalBody">
+        <!-- Task details will be inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+  
