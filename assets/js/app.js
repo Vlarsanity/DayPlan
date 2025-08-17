@@ -7,6 +7,81 @@ let currentTheme = localStorage.getItem('theme') || 'light';
 // Initialize theme
 document.documentElement.setAttribute('data-theme', currentTheme);
 
+// Toast Notification System
+function showToast(title, message = '', type = 'success', duration = 4000) {
+  const toastContainer = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+
+  const icons = {
+    success: '✅',
+    error: '❌',
+    warning: '⚠️',
+    info: 'ℹ️'
+  };
+
+  toast.innerHTML = `
+    <div class="toast-icon">${icons[type] || icons.success}</div>
+    <div class="toast-content">
+      <div class="toast-title">${title}</div>
+      ${message ? `<div class="toast-message">${message}</div>` : ''}
+    </div>
+    <button class="toast-close" onclick="removeToast(this.parentElement)">&times;</button>
+    <div class="toast-progress" style="width: 100%;"></div>
+  `;
+
+  toastContainer.appendChild(toast);
+
+  // Trigger animation
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 100);
+
+  // Progress bar animation
+  const progressBar = toast.querySelector('.toast-progress');
+  setTimeout(() => {
+    progressBar.style.width = '0%';
+    progressBar.style.transition = `width ${duration}ms linear`;
+  }, 100);
+
+  // Auto remove
+  setTimeout(() => {
+    removeToast(toast);
+  }, duration);
+
+  return toast;
+}
+
+function removeToast(toast) {
+  toast.classList.remove('show');
+  setTimeout(() => {
+    if (toast.parentElement) {
+      toast.parentElement.removeChild(toast);
+    }
+  }, 300);
+}
+
+// Highlight calendar day with animation
+function highlightCalendarDay(dateString) {
+  if (!dateString) return;
+  
+  const targetDate = new Date(dateString);
+  const calendarDays = document.querySelectorAll('.calendar-day');
+  
+  calendarDays.forEach(day => {
+    const dayNumber = day.querySelector('.day-number');
+    if (dayNumber) {
+      const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), parseInt(dayNumber.textContent));
+      if (dayDate.toDateString() === targetDate.toDateString()) {
+        day.classList.add('highlight');
+        setTimeout(() => {
+          day.classList.remove('highlight');
+        }, 1000);
+      }
+    }
+  });
+}
+
 // Load tasks from localStorage when page loads
 function loadTasks() {
   const savedTasks = localStorage.getItem('todoTasks');
@@ -21,6 +96,13 @@ function loadTasks() {
   }
   
   renderCalendar();
+  
+  // Welcome message
+  if (tasks.length === 0) {
+    setTimeout(() => {
+      showToast('Welcome to DayPlan!', 'Start by adding your first task above', 'info', 5000);
+    }, 500);
+  }
 }
 
 // Save tasks to localStorage
@@ -34,6 +116,9 @@ function toggleTheme() {
   currentTheme = currentTheme === 'light' ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', currentTheme);
   localStorage.setItem('theme', currentTheme);
+  
+  const themeMessage = currentTheme === 'dark' ? 'Dark mode activated' : 'Light mode activated';
+  showToast('Theme Changed', themeMessage, 'info', 2000);
 }
 
 // Date helper functions
@@ -120,6 +205,7 @@ function clearFilters() {
   document.getElementById('priorityFilter').value = 'all';
   document.getElementById('categoryFilter').value = 'all';
   renderCalendar();
+  showToast('Filters Cleared', 'All tasks are now visible', 'info', 2000);
 }
 
 // Add task
@@ -137,7 +223,7 @@ function addTask() {
   const dueDate = taskDueDate.value.trim();
 
   if (titleText === '' || bodyText === '') {
-    alert('Please fill in both title and description before adding!');
+    showToast('Incomplete Information', 'Please fill in both title and description', 'error', 3000);
     return;
   }
 
@@ -162,6 +248,15 @@ function addTask() {
   priorityLevel.value = 'low';
 
   renderCalendar();
+  
+  // Show success notification
+  const dueDateText = dueDate ? ` for ${formatDate(dueDate)}` : '';
+  showToast('Task Added Successfully!', `"${titleText}"${dueDateText} has been added to your calendar`, 'success', 4000);
+  
+  // Highlight the calendar day
+  if (dueDate) {
+    highlightCalendarDay(dueDate);
+  }
 }
 
 // Calendar navigation
@@ -178,6 +273,7 @@ function nextMonth() {
 function goToToday() {
   currentDate = new Date();
   renderCalendar();
+  showToast('Current Month', 'Navigated to current month', 'info', 2000);
 }
 
 // Render calendar
@@ -257,6 +353,7 @@ function renderCalendar() {
         const dateInput = document.getElementById('taskDueDate');
         dateInput.value = cellDate.toISOString().split('T')[0];
         document.getElementById('taskTitle').focus();
+        showToast('Date Selected', `Click "Add Task" to create a task for ${formatDate(cellDate.toISOString().split('T')[0])}`, 'info', 3000);
       };
 
       calendarBody.appendChild(dayDiv);
@@ -302,11 +399,15 @@ function closeModal() {
 
 // Task operations
 function deleteTask(taskId) {
+  const task = tasks.find(t => t.id === taskId);
+  if (!task) return;
+
   if (confirm('Are you sure you want to delete this task?')) {
     tasks = tasks.filter(task => task.id !== taskId);
     saveTasks();
     closeModal();
     renderCalendar();
+    showToast('Task Deleted', `"${task.title}" has been removed from your calendar`, 'warning', 3000);
   }
 }
 
@@ -317,6 +418,12 @@ function toggleComplete(taskId) {
     saveTasks();
     closeModal();
     renderCalendar();
+    
+    if (task.completed) {
+      showToast('Task Completed! 🎉', `"${task.title}" has been marked as completed`, 'success', 4000);
+    } else {
+      showToast('Task Reopened', `"${task.title}" has been marked as incomplete`, 'info', 3000);
+    }
   }
 }
 
@@ -377,12 +484,13 @@ function saveTask(taskId) {
   const newBody = bodyInput.value.trim();
   
   if (newTitle === '' || newBody === '') {
-    alert('Please fill in both title and description!');
+    showToast('Incomplete Information', 'Please fill in both title and description', 'error', 3000);
     return;
   }
   
   const task = tasks.find(t => t.id === taskId);
   if (task) {
+    const oldTitle = task.title;
     task.title = newTitle;
     task.body = newBody;
     task.dueDate = dateInput.value.trim();
@@ -393,6 +501,12 @@ function saveTask(taskId) {
     saveTasks();
     closeModal();
     renderCalendar();
+    showToast('Task Updated Successfully!', `"${oldTitle}" has been updated`, 'success', 4000);
+    
+    // Highlight the calendar day if date changed
+    if (task.dueDate) {
+      highlightCalendarDay(task.dueDate);
+    }
   }
 }
 
@@ -405,14 +519,16 @@ function cancelEdit(taskId) {
 
 function clearAll() {
   if (tasks.length === 0) {
-    alert('No tasks to clear!');
+    showToast('Nothing to Clear', 'Your calendar is already empty', 'info', 2000);
     return;
   }
   
-  if (confirm('Are you sure you want to delete all tasks?')) {
+  const taskCount = tasks.length;
+  if (confirm(`Are you sure you want to delete all ${taskCount} tasks?`)) {
     tasks = [];
     saveTasks();
     renderCalendar();
+    showToast('All Tasks Cleared', `${taskCount} tasks have been removed from your calendar`, 'warning', 4000);
   }
 }
 
@@ -459,7 +575,7 @@ document.getElementById('taskModal').addEventListener('click', function(event) {
   }
 });
 
-// Add to your JS for better mobile UX
+// Mobile swipe gestures
 let touchStartX = 0;
 let touchEndX = 0;
 
@@ -469,8 +585,16 @@ document.addEventListener('touchstart', e => {
 
 document.addEventListener('touchend', e => {
   touchEndX = e.changedTouches[0].screenX;
-  if (touchEndX < touchStartX - 50) nextMonth();    // Swipe left
-  if (touchEndX > touchStartX + 50) previousMonth(); // Swipe right
+  if (Math.abs(touchEndX - touchStartX) > 50) {
+    if (touchEndX < touchStartX - 50) {
+      nextMonth();    // Swipe left
+      showToast('Next Month', 'Swiped to next month', 'info', 1500);
+    }
+    if (touchEndX > touchStartX + 50) {
+      previousMonth(); // Swipe right
+      showToast('Previous Month', 'Swiped to previous month', 'info', 1500);
+    }
+  }
 });
 
 // Initialize app
