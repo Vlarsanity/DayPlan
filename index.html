@@ -10,7 +10,7 @@
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <h1>📅 My Calendar Task Timeline</h1>
+      <h1>📅 DayPlan</h1>
       <div class="header-controls">
         <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
       </div>
@@ -119,15 +119,15 @@
     <!-- Stats -->
     <div class="stats">
       <div class="stats-grid">
-        <div class="stat-item">
+        <div class="stat-item total-count">
           <div class="stat-number" id="totalCount">0</div>
           <div class="stat-label">Total Tasks</div>
         </div>
-        <div class="stat-item">
+        <div class="stat-item completed-count">
           <div class="stat-number" id="completedCount">0</div>
           <div class="stat-label">Completed</div>
         </div>
-        <div class="stat-item">
+        <div class="stat-item pending-count">
           <div class="stat-number" id="pendingCount">0</div>
           <div class="stat-label">Pending</div>
         </div>
@@ -138,6 +138,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <!-- Task Detail Modal -->
   <div class="modal" id="taskModal">
@@ -153,4 +156,5 @@
   </div>
 
   <script src="assets/js/app.js"></script>
-  
+</body>
+</html>
