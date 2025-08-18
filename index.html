@@ -12,7 +12,16 @@
     <div class="header">
       <h1>📅 DayPlan</h1>
       <div class="header-controls">
+        <button class="reminder-toggle" onclick="toggleReminders()">🔔 Reminders</button>
         <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+      </div>
+    </div>
+
+    <!-- Reminder Panel -->
+    <div class="reminder-panel" id="reminderPanel">
+      <h3>🔔 Task Reminders & Alerts</h3>
+      <div class="reminder-list" id="reminderList">
+        <!-- Reminders will be populated here -->
       </div>
     </div>
 
