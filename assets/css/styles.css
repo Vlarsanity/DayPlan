@@ -101,7 +101,7 @@ body {
   gap: 15px;
 }
 
-.theme-toggle {
+.theme-toggle, .reminder-toggle {
   background: var(--bg-secondary);
   border: 2px solid var(--border-color);
   color: var(--text-primary);
@@ -113,10 +113,147 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover, .reminder-toggle:hover {
   border-color: var(--border-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
+}
+
+.reminder-toggle.active {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+/* Reminder Panel */
+.reminder-panel {
+  background: var(--bg-secondary);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  margin-bottom: 20px;
+  display: none;
+}
+
+.reminder-panel.active {
+  display: block;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reminder-panel h3 {
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reminder-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.reminder-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border-left: 4px solid;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reminder-item:hover {
+  transform: translateX(5px);
+  box-shadow: var(--shadow-sm);
+}
+
+.reminder-item.overdue {
+  background: var(--overdue-bg);
+  border-left-color: var(--danger);
+  color: var(--overdue-text);
+}
+
+.reminder-item.due-tomorrow {
+  background: var(--due-today-bg);
+  border-left-color: var(--warning);
+}
+
+.reminder-item.due-3-days {
+  background: rgba(249, 115, 22, 0.1);
+  border-left-color: #f97316;
+}
+
+.reminder-item.due-1-week {
+  background: rgba(59, 130, 246, 0.1);
+  border-left-color: var(--info);
+}
+
+.reminder-item.due-2-weeks {
+  background: rgba(16, 185, 129, 0.1);
+  border-left-color: var(--success);
+}
+
+.reminder-content {
+  flex: 1;
+}
+
+.reminder-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.reminder-details {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.reminder-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.reminder-badge.overdue {
+  background: var(--danger);
+  color: white;
+}
+
+.reminder-badge.due-tomorrow {
+  background: var(--warning);
+  color: white;
+}
+
+.reminder-badge.due-3-days {
+  background: #f97316;
+  color: white;
+}
+
+.reminder-badge.due-1-week {
+  background: var(--info);
+  color: white;
+}
+
+.reminder-badge.due-2-weeks {
+  background: var(--success);
+  color: white;
+}
+
+.no-reminders {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px;
+  font-style: italic;
 }
 
 /* Toast Notifications */
