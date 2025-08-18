@@ -4,6 +4,10 @@ let taskIdCounter = 0;
 let currentDate = new Date();
 let currentTheme = localStorage.getItem('theme') || 'light';
 
+// NEW: Reminder system variables
+let remindersEnabled = localStorage.getItem('remindersEnabled') === 'true';
+let lastReminderCheck = localStorage.getItem('lastReminderCheck') || '';
+
 // Initialize theme
 document.documentElement.setAttribute('data-theme', currentTheme);
 
@@ -80,6 +84,232 @@ function highlightCalendarDay(dateString) {
       }
     }
   });
+}
+
+// NEW: Initialize reminder system
+function initializeReminders() {
+  const reminderToggle = document.querySelector('.reminder-toggle');
+  if (remindersEnabled) {
+    reminderToggle.classList.add('active');
+    document.getElementById('reminderPanel').classList.add('active');
+  }
+  
+  // Check for reminders immediately and set up periodic checks
+  checkReminders();
+  
+  // Check every 30 minutes for new reminders
+  setInterval(checkReminders, 30 * 60 * 1000);
+}
+
+// NEW: Toggle reminder panel visibility
+function toggleReminders() {
+  const panel = document.getElementById('reminderPanel');
+  const toggle = document.querySelector('.reminder-toggle');
+  
+  remindersEnabled = !remindersEnabled;
+  localStorage.setItem('remindersEnabled', remindersEnabled.toString());
+  
+  if (remindersEnabled) {
+    panel.classList.add('active');
+    toggle.classList.add('active');
+    updateReminderList();
+    showToast('Reminders Enabled', 'You will now receive task reminders', 'success', 3000);
+  } else {
+    panel.classList.remove('active');
+    toggle.classList.remove('active');
+    showToast('Reminders Disabled', 'Task reminders have been turned off', 'info', 3000);
+  }
+}
+
+// NEW: Check for tasks that need reminders
+function checkReminders() {
+  if (!remindersEnabled) return;
+  
+  const today = new Date();
+  const todayStr = today.toDateString();
+  
+  // Don't check more than once per day for initial load
+  if (lastReminderCheck === todayStr) return;
+  
+  const reminders = [];
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  
+  tasks.forEach(task => {
+    if (task.completed || !task.dueDate) return;
+    
+    const dueDate = new Date(task.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
+    
+    const timeDiff = dueDate.getTime() - now.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    
+    // Overdue tasks
+    if (daysDiff < 0) {
+      reminders.push({
+        task,
+        type: 'overdue',
+        message: `${Math.abs(daysDiff)} days overdue`,
+        priority: 1
+      });
+    }
+    // Due tomorrow
+    else if (daysDiff === 1) {
+      reminders.push({
+        task,
+        type: 'due-tomorrow',
+        message: 'Due tomorrow',
+        priority: 2
+      });
+    }
+    // Due in 3 days
+    else if (daysDiff === 3) {
+      reminders.push({
+        task,
+        type: 'due-3-days',
+        message: 'Due in 3 days',
+        priority: 3
+      });
+    }
+    // Due in 1 week
+    else if (daysDiff === 7) {
+      reminders.push({
+        task,
+        type: 'due-1-week',
+        message: 'Due in 1 week',
+        priority: 4
+      });
+    }
+    // Due in 2 weeks
+    else if (daysDiff === 14) {
+      reminders.push({
+        task,
+        type: 'due-2-weeks',
+        message: 'Due in 2 weeks',
+        priority: 5
+      });
+    }
+  });
+  
+  // Show toast notifications for high priority reminders (only once per day)
+  if (lastReminderCheck !== todayStr) {
+    const criticalReminders = reminders.filter(r => r.priority <= 2);
+    if (criticalReminders.length > 0) {
+      const overdueCount = reminders.filter(r => r.type === 'overdue').length;
+      const tomorrowCount = reminders.filter(r => r.type === 'due-tomorrow').length;
+      
+      if (overdueCount > 0) {
+        showToast('⚠️ Overdue Tasks!', 
+          `You have ${overdueCount} overdue task${overdueCount > 1 ? 's' : ''}`, 
+          'error', 6000);
+      }
+      
+      if (tomorrowCount > 0) {
+        showToast('📅 Tasks Due Tomorrow', 
+          `${tomorrowCount} task${tomorrowCount > 1 ? 's' : ''} due tomorrow`, 
+          'warning', 5000);
+      }
+    }
+    
+    lastReminderCheck = todayStr;
+    localStorage.setItem('lastReminderCheck', lastReminderCheck);
+  }
+  
+  updateReminderList();
+}
+
+// NEW: Update the reminder list display
+function updateReminderList() {
+  if (!remindersEnabled) return;
+  
+  const reminderList = document.getElementById('reminderList');
+  const reminders = [];
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  
+  tasks.forEach(task => {
+    if (task.completed || !task.dueDate) return;
+    
+    const dueDate = new Date(task.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
+    
+    const timeDiff = dueDate.getTime() - now.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    
+    let reminderInfo = null;
+    
+    if (daysDiff < 0) {
+      reminderInfo = {
+        task,
+        type: 'overdue',
+        message: `${Math.abs(daysDiff)} day${Math.abs(daysDiff) > 1 ? 's' : ''} overdue`,
+        priority: 1,
+        badgeText: 'OVERDUE'
+      };
+    } else if (daysDiff === 1) {
+      reminderInfo = {
+        task,
+        type: 'due-tomorrow',
+        message: 'Due tomorrow',
+        priority: 2,
+        badgeText: 'TOMORROW'
+      };
+    } else if (daysDiff <= 3) {
+      reminderInfo = {
+        task,
+        type: 'due-3-days',
+        message: `Due in ${daysDiff} day${daysDiff > 1 ? 's' : ''}`,
+        priority: 3,
+        badgeText: `${daysDiff} DAY${daysDiff > 1 ? 'S' : ''}`
+      };
+    } else if (daysDiff <= 7) {
+      reminderInfo = {
+        task,
+        type: 'due-1-week',
+        message: `Due in ${daysDiff} day${daysDiff > 1 ? 's' : ''}`,
+        priority: 4,
+        badgeText: `${daysDiff} DAYS`
+      };
+    } else if (daysDiff <= 14) {
+      reminderInfo = {
+        task,
+        type: 'due-2-weeks',
+        message: `Due in ${daysDiff} day${daysDiff > 1 ? 's' : ''}`,
+        priority: 5,
+        badgeText: `${daysDiff} DAYS`
+      };
+    }
+    
+    if (reminderInfo) {
+      reminders.push(reminderInfo);
+    }
+  });
+  
+  // Sort by priority (most urgent first)
+  reminders.sort((a, b) => a.priority - b.priority);
+  
+  if (reminders.length === 0) {
+    reminderList.innerHTML = `
+      <div class="no-reminders">
+        🎉 No upcoming deadlines! You're all caught up.
+      </div>
+    `;
+    return;
+  }
+  
+  reminderList.innerHTML = reminders.map(reminder => `
+    <div class="reminder-item ${reminder.type}" onclick="showTaskModal(reminder.task)">
+      <div class="reminder-content">
+        <div class="reminder-title">${reminder.task.title}</div>
+        <div class="reminder-details">
+          ${reminder.task.category} • Priority: ${reminder.task.priority} • ${reminder.message}
+        </div>
+      </div>
+      <div class="reminder-badge ${reminder.type}">
+        ${reminder.badgeText}
+      </div>
+    </div>
+  `).join('');
 }
 
 // Load tasks from localStorage when page loads
