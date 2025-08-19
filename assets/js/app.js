@@ -298,7 +298,7 @@ function updateReminderList() {
   }
   
   reminderList.innerHTML = reminders.map(reminder => `
-    <div class="reminder-item ${reminder.type}" onclick="showTaskModal(reminder.task)">
+    <div class="reminder-item ${reminder.type}" onclick="showTaskModal(tasks.find(t => t.id === ${reminder.task.id}))">
       <div class="reminder-content">
         <div class="reminder-title">${reminder.task.title}</div>
         <div class="reminder-details">
