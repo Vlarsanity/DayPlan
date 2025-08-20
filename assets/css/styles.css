@@ -111,6 +111,7 @@ body {
   font-size: 16px;
   transition: all 0.3s ease;
   box-shadow: var(--shadow-sm);
+  position: relative;
 }
 
 .theme-toggle:hover, .reminder-toggle:hover {
@@ -125,6 +126,81 @@ body {
   color: white;
 }
 
+/* Enhanced reminder toggle with notification indicator */
+.reminder-toggle.active::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: var(--priority-high);
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: notificationPulse 2s infinite;
+}
+
+@keyframes notificationPulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* Notification Status Indicator */
+.notification-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  min-width: 80px;
+}
+
+.notification-indicator {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.notification-status small {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1;
+}
+
+.notification-status.enabled {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--success);
+}
+
+.notification-status.enabled .notification-indicator {
+  animation: notificationBounce 3s infinite;
+}
+
+.notification-status.enabled small {
+  color: var(--success);
+}
+
+@keyframes notificationBounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-3px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+}
+
 /* Reminder Panel */
 .reminder-panel {
   background: var(--bg-secondary);
@@ -134,11 +210,29 @@ body {
   border: 1px solid var(--border-color);
   margin-bottom: 20px;
   display: none;
+  position: relative;
+  overflow: hidden;
 }
 
 .reminder-panel.active {
   display: block;
   animation: slideDown 0.3s ease;
+}
+
+.reminder-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--success), var(--info), var(--warning), var(--danger));
+  animation: gradientShift 4s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
 }
 
 @keyframes slideDown {
@@ -169,11 +263,29 @@ body {
   border-left: 4px solid;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+}
+
+.reminder-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: inherit;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.3s ease;
 }
 
 .reminder-item:hover {
   transform: translateX(5px);
   box-shadow: var(--shadow-sm);
+}
+
+.reminder-item:hover::before {
+  transform: scaleY(1);
 }
 
 .reminder-item.overdue {
@@ -222,11 +334,29 @@ body {
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
+  animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
 }
 
 .reminder-badge.overdue {
   background: var(--danger);
   color: white;
+  animation: urgentPulse 1s infinite;
+}
+
+@keyframes urgentPulse {
+  0%, 100% { 
+    background: var(--danger);
+    transform: scale(1);
+  }
+  50% { 
+    background: var(--danger-hover);
+    transform: scale(1.05);
+  }
 }
 
 .reminder-badge.due-tomorrow {
@@ -254,9 +384,12 @@ body {
   color: var(--text-muted);
   padding: 40px;
   font-style: italic;
+  background: linear-gradient(45deg, rgba(16, 185, 129, 0.05), rgba(59, 130, 246, 0.05));
+  border-radius: 8px;
+  border: 2px dashed var(--border-color);
 }
 
-/* Toast Notifications */
+/* Enhanced Toast Notifications */
 .toast-container {
   position: fixed;
   top: 20px;
@@ -283,6 +416,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  backdrop-filter: blur(10px);
 }
 
 .toast.show {
@@ -292,23 +426,34 @@ body {
 
 .toast.success {
   border-left: 4px solid var(--success);
+  background: linear-gradient(135deg, var(--bg-secondary), rgba(16, 185, 129, 0.05));
 }
 
 .toast.error {
   border-left: 4px solid var(--danger);
+  background: linear-gradient(135deg, var(--bg-secondary), rgba(239, 68, 68, 0.05));
 }
 
 .toast.warning {
   border-left: 4px solid var(--warning);
+  background: linear-gradient(135deg, var(--bg-secondary), rgba(245, 158, 11, 0.05));
 }
 
 .toast.info {
   border-left: 4px solid var(--info);
+  background: linear-gradient(135deg, var(--bg-secondary), rgba(6, 182, 212, 0.05));
 }
 
 .toast-icon {
   font-size: 18px;
   flex-shrink: 0;
+  animation: iconBounce 0.6s ease-out;
+}
+
+@keyframes iconBounce {
+  0% { transform: scale(0) rotate(180deg); }
+  50% { transform: scale(1.2) rotate(0deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }
 
 .toast-content {
@@ -340,6 +485,7 @@ body {
 .toast-close:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);
+  transform: rotate(90deg);
 }
 
 .toast-progress {
@@ -583,14 +729,6 @@ button:hover {
   box-shadow: var(--shadow-sm);
 }
 
-.task-item.priority-high {
-  border-left-color: var(--priority-high);
-}
-
-.task-item.priority-medium {
-  border-left-color: var(--priority-medium);
-}
-
 .task-item.priority-low {
   border-left-color: var(--priority-low);
 }
@@ -625,12 +763,19 @@ button:hover {
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   z-index: 1000;
+  backdrop-filter: blur(5px);
 }
 
 .modal.active {
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
@@ -643,6 +788,18 @@ button:hover {
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border-color);
+  animation: modalSlideUp 0.3s ease;
+}
+
+@keyframes modalSlideUp {
+  from { 
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal-header {
@@ -667,12 +824,14 @@ button:hover {
   cursor: pointer;
   color: var(--text-secondary);
   padding: 5px;
+  transition: all 0.2s ease;
 }
 
 .close-modal:hover {
   color: var(--text-primary);
   background: var(--bg-tertiary);
   border-radius: 4px;
+  transform: rotate(90deg);
 }
 
 .task-details {
@@ -697,27 +856,37 @@ button:hover {
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
+  animation: badgeGlow 2s infinite;
+}
+
+@keyframes badgeGlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
 }
 
 .priority-badge.high {
   background: var(--priority-high);
   color: white;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
 .priority-badge.medium {
   background: var(--priority-medium);
   color: white;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
 }
 
 .priority-badge.low {
   background: var(--priority-low);
   color: white;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
 }
 
 .modal-actions {
   display: flex;
   gap: 10px;
   margin-top: 20px;
+  flex-wrap: wrap;
 }
 
 /* Filter Section */
@@ -782,12 +951,21 @@ button:hover {
 
 .stat-item {
   text-align: center;
+  transition: all 0.3s ease;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .stat-number {
   font-size: 2rem;
   font-weight: 700;
   color: var(--accent-primary);
+  transition: all 0.3s ease;
 }
 
 .stat-label {
@@ -797,6 +975,7 @@ button:hover {
 
 .overdue-stat .stat-number {
   color: var(--danger);
+  animation: urgentPulse 2s infinite;
 }
 
 .total-count .stat-number {
@@ -830,6 +1009,13 @@ button:hover {
   border-radius: 6px;
   background: var(--bg-primary);
   color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.edit-input:focus, .edit-select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .save-btn {
@@ -848,7 +1034,7 @@ button:hover {
   background: var(--text-secondary);
 }
 
-/* Mobile Toast Adjustments */
+/* Enhanced Mobile Responsiveness */
 @media (max-width: 768px) {
   .toast-container {
     top: 10px;
@@ -878,6 +1064,19 @@ button:hover {
 
   .header h1 {
     font-size: 2rem;
+  }
+
+  .header-controls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .notification-status {
+    order: 3;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
   }
 
   .input-row {
@@ -911,6 +1110,32 @@ button:hover {
     padding: 20px;
     margin: 20px;
   }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+
+  .reminder-panel {
+    padding: 15px;
+  }
+
+  .reminder-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .reminder-badge {
+    align-self: flex-end;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 480px) {
@@ -932,4 +1157,100 @@ button:hover {
     font-size: 9px;
     margin-bottom: 2px;
   }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .reminder-item {
+    padding: 10px;
+  }
+
+  .reminder-title {
+    font-size: 14px;
+  }
+
+  .reminder-details {
+    font-size: 12px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+  }
+}
+
+/* Dark mode specific enhancements */
+[data-theme="dark"] .toast {
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .modal {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="dark"] .reminder-panel::before {
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .priority-badge.high {
+  box-shadow: 0 0 15px rgba(248, 113, 113, 0.4);
+}
+
+[data-theme="dark"] .priority-badge.medium {
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+}
+
+[data-theme="dark"] .priority-badge.low {
+  box-shadow: 0 0 15px rgba(52, 211, 153, 0.4);
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus indicators for better accessibility */
+.reminder-toggle:focus,
+.theme-toggle:focus,
+button:focus,
+input:focus,
+select:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .toast,
+  .modal-content,
+  .reminder-panel,
+  .calendar,
+  .input-section,
+  .filter-section,
+  .stats {
+    border: 2px solid var(--text-primary);
+  }
+  
+  .reminder-item,
+  .task-item {
+    border: 1px solid var(--text-primary);
+  }
+}high {
+  border-left-color: var(--priority-high);
+}
+
+.task-item.priority-medium {
+  border-left-color: var(--priority-medium);
 }
