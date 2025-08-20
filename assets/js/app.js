@@ -4,12 +4,122 @@ let taskIdCounter = 0;
 let currentDate = new Date();
 let currentTheme = localStorage.getItem('theme') || 'light';
 
-// NEW: Reminder system variables
+// Reminder system variables
 let remindersEnabled = localStorage.getItem('remindersEnabled') === 'true';
 let lastReminderCheck = localStorage.getItem('lastReminderCheck') || '';
 
+// Native notification variables
+let notificationsEnabled = localStorage.getItem('notificationsEnabled') === 'true';
+let notificationPermission = 'default';
+
 // Initialize theme
 document.documentElement.setAttribute('data-theme', currentTheme);
+
+// Check notification support and permission on load
+function initializeNotifications() {
+  if ('Notification' in window) {
+    notificationPermission = Notification.permission;
+    
+    // If user previously enabled notifications but permission was revoked
+    if (notificationsEnabled && Notification.permission !== 'granted') {
+      notificationsEnabled = false;
+      localStorage.setItem('notificationsEnabled', 'false');
+    }
+  } else {
+    // Browser doesn't support notifications
+    notificationsEnabled = false;
+    localStorage.setItem('notificationsEnabled', 'false');
+  }
+}
+
+// Request notification permission
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    showToast('Not Supported', 'This browser does not support notifications', 'error', 5000);
+    return false;
+  }
+
+  if (Notification.permission === 'granted') {
+    return true;
+  }
+
+  if (Notification.permission === 'denied') {
+    showToast('Permission Denied', 'Please enable notifications in your browser settings', 'error', 5000);
+    return false;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+    notificationPermission = permission;
+    
+    if (permission === 'granted') {
+      showToast('Notifications Enabled!', 'You will now receive device notifications', 'success', 4000);
+      return true;
+    } else {
+      showToast('Permission Required', 'Please allow notifications to use this feature', 'warning', 4000);
+      return false;
+    }
+  } catch (error) {
+    showToast('Error', 'Failed to request notification permission', 'error', 3000);
+    return false;
+  }
+}
+
+// Send native device notification
+function sendNativeNotification(title, message, taskId = null, options = {}) {
+  if (!notificationsEnabled || Notification.permission !== 'granted') {
+    return;
+  }
+
+  const defaultOptions = {
+    icon: 'data:image/svg+xml;base64,' + btoa(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <rect width="100" height="100" fill="#3b82f6" rx="20"/>
+        <text x="50" y="60" font-size="50" text-anchor="middle" fill="white">📅</text>
+      </svg>
+    `),
+    badge: 'data:image/svg+xml;base64,' + btoa(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
+        <circle cx="25" cy="25" r="25" fill="#3b82f6"/>
+        <text x="25" y="35" font-size="25" text-anchor="middle" fill="white">📅</text>
+      </svg>
+    `),
+    tag: taskId ? `task-${taskId}` : `reminder-${Date.now()}`,
+    requireInteraction: false,
+    silent: false,
+    ...options
+  };
+
+  try {
+    const notification = new Notification(title, {
+      body: message,
+      ...defaultOptions
+    });
+
+    // Handle notification click
+    notification.onclick = function() {
+      window.focus(); // Focus the browser window
+      
+      // If there's a task ID, show the task modal
+      if (taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (task) {
+          showTaskModal(task);
+        }
+      }
+      
+      notification.close();
+    };
+
+    // Auto-close after 10 seconds
+    setTimeout(() => {
+      notification.close();
+    }, 10000);
+
+  } catch (error) {
+    console.error('Failed to send notification:', error);
+  }
+}
 
 // Toast Notification System
 function showToast(title, message = '', type = 'success', duration = 4000) {
@@ -86,7 +196,7 @@ function highlightCalendarDay(dateString) {
   });
 }
 
-// NEW: Initialize reminder system
+// Initialize reminder system
 function initializeReminders() {
   const reminderToggle = document.querySelector('.reminder-toggle');
   if (remindersEnabled) {
@@ -101,10 +211,17 @@ function initializeReminders() {
   setInterval(checkReminders, 30 * 60 * 1000);
 }
 
-// NEW: Toggle reminder panel visibility
-function toggleReminders() {
+// Enhanced toggle reminders with notification permission
+async function toggleReminders() {
   const panel = document.getElementById('reminderPanel');
   const toggle = document.querySelector('.reminder-toggle');
+  
+  if (!remindersEnabled) {
+    // Request permission when enabling reminders
+    const hasPermission = await requestNotificationPermission();
+    notificationsEnabled = hasPermission;
+    localStorage.setItem('notificationsEnabled', notificationsEnabled.toString());
+  }
   
   remindersEnabled = !remindersEnabled;
   localStorage.setItem('remindersEnabled', remindersEnabled.toString());
@@ -113,15 +230,30 @@ function toggleReminders() {
     panel.classList.add('active');
     toggle.classList.add('active');
     updateReminderList();
-    showToast('Reminders Enabled', 'You will now receive task reminders', 'success', 3000);
+    
+    if (notificationsEnabled) {
+      showToast('Full Reminders Enabled', 'You will receive both in-app and device notifications', 'success', 3000);
+      
+      // Send a test notification
+      sendNativeNotification(
+        '🔔 DayPlan Notifications Active',
+        'You will now receive reminders for upcoming and overdue tasks',
+        null,
+        { requireInteraction: false }
+      );
+    } else {
+      showToast('Reminders Enabled', 'You will receive in-app reminders only', 'success', 3000);
+    }
   } else {
     panel.classList.remove('active');
     toggle.classList.remove('active');
-    showToast('Reminders Disabled', 'Task reminders have been turned off', 'info', 3000);
+    notificationsEnabled = false;
+    localStorage.setItem('notificationsEnabled', 'false');
+    showToast('Reminders Disabled', 'All reminders have been turned off', 'info', 3000);
   }
 }
 
-// NEW: Check for tasks that need reminders
+// Enhanced check for tasks that need reminders
 function checkReminders() {
   if (!remindersEnabled) return;
   
@@ -191,7 +323,7 @@ function checkReminders() {
     }
   });
   
-  // Show toast notifications for high priority reminders (only once per day)
+  // Show notifications for high priority reminders (only once per day)
   if (lastReminderCheck !== todayStr) {
     const criticalReminders = reminders.filter(r => r.priority <= 2);
     if (criticalReminders.length > 0) {
@@ -199,15 +331,33 @@ function checkReminders() {
       const tomorrowCount = reminders.filter(r => r.type === 'due-tomorrow').length;
       
       if (overdueCount > 0) {
+        // In-app toast
         showToast('⚠️ Overdue Tasks!', 
           `You have ${overdueCount} overdue task${overdueCount > 1 ? 's' : ''}`, 
           'error', 6000);
+        
+        // Native notification
+        sendNativeNotification(
+          '⚠️ Overdue Tasks!',
+          `You have ${overdueCount} overdue task${overdueCount > 1 ? 's' : ''} that need attention`,
+          null,
+          { requireInteraction: true }
+        );
       }
       
       if (tomorrowCount > 0) {
+        // In-app toast
         showToast('📅 Tasks Due Tomorrow', 
           `${tomorrowCount} task${tomorrowCount > 1 ? 's' : ''} due tomorrow`, 
           'warning', 5000);
+        
+        // Native notification
+        sendNativeNotification(
+          '📅 Tasks Due Tomorrow',
+          `${tomorrowCount} task${tomorrowCount > 1 ? 's' : ''} due tomorrow - don't forget!`,
+          null,
+          { requireInteraction: false }
+        );
       }
     }
     
@@ -218,7 +368,7 @@ function checkReminders() {
   updateReminderList();
 }
 
-// NEW: Update the reminder list display
+// Update the reminder list display (fixed the onclick issue)
 function updateReminderList() {
   if (!remindersEnabled) return;
   
@@ -297,8 +447,9 @@ function updateReminderList() {
     return;
   }
   
+  // FIXED: Use task ID instead of reminder object
   reminderList.innerHTML = reminders.map(reminder => `
-    <div class="reminder-item ${reminder.type}" onclick="showTaskModal(tasks.find(t => t.id === ${reminder.task.id}))">
+    <div class="reminder-item ${reminder.type}" onclick="showTaskFromReminder(${reminder.task.id})">
       <div class="reminder-content">
         <div class="reminder-title">${reminder.task.title}</div>
         <div class="reminder-details">
@@ -310,6 +461,14 @@ function updateReminderList() {
       </div>
     </div>
   `).join('');
+}
+
+// Helper function to show task modal from reminder click
+function showTaskFromReminder(taskId) {
+  const task = tasks.find(t => t.id === taskId);
+  if (task) {
+    showTaskModal(task);
+  }
 }
 
 // Load tasks from localStorage when page loads
@@ -438,7 +597,7 @@ function clearFilters() {
   showToast('Filters Cleared', 'All tasks are now visible', 'info', 2000);
 }
 
-// Add task
+// Enhanced add task with native notifications
 function addTask() {
   const titleInput = document.getElementById('taskTitle');
   const bodyInput = document.getElementById('taskBody');
@@ -483,10 +642,30 @@ function addTask() {
   const dueDateText = dueDate ? ` for ${formatDate(dueDate)}` : '';
   showToast('Task Added Successfully!', `"${titleText}"${dueDateText} has been added to your calendar`, 'success', 4000);
   
+  // Send native notification for urgent tasks
+  if (dueDate && notificationsEnabled) {
+    const today = new Date();
+    const taskDate = new Date(dueDate);
+    const timeDiff = taskDate.getTime() - today.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    
+    if (daysDiff <= 1 && priority === 'high') {
+      sendNativeNotification(
+        '🚨 Urgent Task Added!',
+        `High priority task "${titleText}" is due ${daysDiff === 0 ? 'today' : 'tomorrow'}`,
+        newTask.id,
+        { requireInteraction: true }
+      );
+    }
+  }
+  
   // Highlight the calendar day
   if (dueDate) {
     highlightCalendarDay(dueDate);
   }
+  
+  // Update reminders to include the new task
+  updateReminderList();
 }
 
 // Calendar navigation
@@ -591,6 +770,7 @@ function renderCalendar() {
   }
 
   updateStats();
+  updateReminderList();
 }
 
 // Modal functions
@@ -641,6 +821,7 @@ function deleteTask(taskId) {
   }
 }
 
+// Enhanced toggle complete with celebration notifications
 function toggleComplete(taskId) {
   const task = tasks.find(t => t.id === taskId);
   if (task) {
@@ -651,9 +832,22 @@ function toggleComplete(taskId) {
     
     if (task.completed) {
       showToast('Task Completed! 🎉', `"${task.title}" has been marked as completed`, 'success', 4000);
+      
+      // Send celebration notification for completed high-priority tasks
+      if (task.priority === 'high' && notificationsEnabled) {
+        sendNativeNotification(
+          '🎉 High Priority Task Completed!',
+          `Great job completing "${task.title}"!`,
+          task.id,
+          { requireInteraction: false }
+        );
+      }
     } else {
       showToast('Task Reopened', `"${task.title}" has been marked as incomplete`, 'info', 3000);
     }
+    
+    // Update reminders since task status changed
+    updateReminderList();
   }
 }
 
@@ -827,5 +1021,9 @@ document.addEventListener('touchend', e => {
   }
 });
 
-// Initialize app
-window.addEventListener('load', loadTasks);
+// Enhanced initialization
+window.addEventListener('load', function() {
+  initializeNotifications();
+  initializeReminders();
+  loadTasks();
+});
