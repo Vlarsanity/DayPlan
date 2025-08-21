@@ -183,10 +183,25 @@ body {
 
 .notification-status.enabled .notification-indicator {
   animation: notificationBounce 3s infinite;
+  color: var(--success);
 }
 
 .notification-status.enabled small {
   color: var(--success);
+}
+
+/* FIXED: Added missing disabled state */
+.notification-status.disabled {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--danger);
+}
+
+.notification-status.disabled .notification-indicator {
+  color: var(--danger);
+}
+
+.notification-status.disabled small {
+  color: var(--danger);
 }
 
 @keyframes notificationBounce {
@@ -709,7 +724,7 @@ button:hover {
   color: var(--text-muted);
 }
 
-/* Task Items in Calendar */
+/* Task Items in Calendar - FIXED PRIORITY STYLING */
 .task-item {
   background: var(--bg-primary);
   border-radius: 6px;
@@ -722,6 +737,9 @@ button:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .task-item:hover {
@@ -731,6 +749,17 @@ button:hover {
 
 .task-item.priority-low {
   border-left-color: var(--priority-low);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.task-item.priority-medium {
+  border-left-color: var(--priority-medium);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.task-item.priority-high {
+  border-left-color: var(--priority-high);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .task-item.completed {
@@ -742,6 +771,12 @@ button:hover {
   background: var(--overdue-bg);
   color: var(--overdue-text);
   border-left-color: var(--danger);
+  animation: overdueFlash 2s infinite;
+}
+
+@keyframes overdueFlash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .task-item.new-task {
@@ -926,6 +961,7 @@ button:hover {
 .clear-filters-btn {
   background: var(--warning);
   grid-column: span 1;
+  transition: all 0.3s ease; /* FIXED: Added missing transition */
 }
 
 .clear-filters-btn:hover {
@@ -1020,6 +1056,7 @@ button:hover {
 
 .save-btn {
   background: var(--success);
+  transition: all 0.3s ease; /* FIXED: Added missing transition */
 }
 
 .save-btn:hover {
@@ -1028,10 +1065,62 @@ button:hover {
 
 .cancel-btn {
   background: var(--text-muted);
+  transition: all 0.3s ease; /* FIXED: Added missing transition */
 }
 
 .cancel-btn:hover {
   background: var(--text-secondary);
+}
+
+/* FIXED: Missing Loading States */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+  position: relative;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--accent-primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+@keyframes spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* FIXED: Enhanced Accessibility - Focus States */
+.calendar-day:focus,
+.task-item:focus,
+.reminder-item:focus,
+.reminder-toggle:focus,
+.theme-toggle:focus,
+button:focus,
+input:focus,
+select:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* FIXED: Better keyboard navigation */
+.calendar-day:focus {
+  background: var(--bg-tertiary);
+  box-shadow: inset 0 0 0 2px var(--accent-primary);
+}
+
+.task-item:focus {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+  z-index: 10;
 }
 
 /* Enhanced Mobile Responsiveness */
@@ -1088,9 +1177,10 @@ button:hover {
     min-height: 400px;
   }
 
+  /* FIXED: Enhanced mobile touch targets */
   .calendar-day {
-    min-height: 80px;
-    padding: 4px;
+    min-height: 100px; /* Increased from 80px */
+    padding: 6px; /* Increased from 4px */
   }
 
   .day-number {
@@ -1099,7 +1189,8 @@ button:hover {
 
   .task-item {
     font-size: 10px;
-    padding: 2px 4px;
+    padding: 4px 6px; /* Increased padding */
+    min-height: 24px; /* Added minimum touch target */
   }
 
   .filter-row {
@@ -1149,13 +1240,14 @@ button:hover {
   }
 
   .calendar-day {
-    min-height: 60px;
-    padding: 2px;
+    min-height: 80px; /* Increased from 60px */
+    padding: 4px; /* Increased from 2px */
   }
 
   .task-item {
     font-size: 9px;
     margin-bottom: 2px;
+    min-height: 20px;
   }
 
   .header h1 {
@@ -1180,6 +1272,51 @@ button:hover {
 
   .stat-number {
     font-size: 1.5rem;
+  }
+}
+
+/* FIXED: Print Styles */
+@media print {
+  .header-controls,
+  .input-section,
+  .filter-section,
+  .reminder-panel,
+  .toast-container,
+  .modal,
+  .stats {
+    display: none !important;
+  }
+  
+  .header {
+    border-bottom: 2px solid #000;
+    margin-bottom: 20px;
+  }
+  
+  .calendar {
+    box-shadow: none;
+    border: 2px solid #000;
+    break-inside: avoid;
+  }
+  
+  .calendar-day {
+    border: 1px solid #000;
+    min-height: 80px;
+  }
+  
+  .task-item {
+    background: #f0f0f0 !important;
+    color: #000 !important;
+    border-left: 3px solid #666 !important;
+  }
+  
+  .task-item.priority-high {
+    border-left-color: #000 !important;
+    font-weight: bold;
+  }
+  
+  .day-number {
+    font-weight: bold;
+    color: #000;
   }
 }
 
@@ -1209,6 +1346,22 @@ button:hover {
   box-shadow: 0 0 15px rgba(52, 211, 153, 0.4);
 }
 
+/* FIXED: Performance optimizations with will-change */
+.calendar-day:hover,
+.task-item:hover,
+.toast.show,
+.modal.active,
+.reminder-item:hover {
+  will-change: transform;
+}
+
+.toast,
+.modal-content,
+.reminder-item,
+.task-item {
+  will-change: auto;
+}
+
 /* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -1219,16 +1372,14 @@ button:hover {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* Focus indicators for better accessibility */
-.reminder-toggle:focus,
-.theme-toggle:focus,
-button:focus,
-input:focus,
-select:focus {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
+  
+  .toast,
+  .modal-content,
+  .reminder-item,
+  .task-item,
+  .calendar-day {
+    transform: none !important;
+  }
 }
 
 /* High contrast mode support */
@@ -1247,10 +1398,55 @@ select:focus {
   .task-item {
     border: 1px solid var(--text-primary);
   }
-}high {
-  border-left-color: var(--priority-high);
+  
+  .priority-badge,
+  .reminder-badge {
+    border: 1px solid var(--text-primary);
+  }
 }
 
-.task-item.priority-medium {
-  border-left-color: var(--priority-medium);
+/* FIXED: Screen reader support */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* FIXED: Focus trap for modals */
+.modal.active {
+  contain: layout style;
+}
+
+/* FIXED: Better scroll behavior */
+.reminder-list,
+.modal-content {
+  scroll-behavior: smooth;
+}
+
+.reminder-list::-webkit-scrollbar,
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.reminder-list::-webkit-scrollbar-track,
+.modal-content::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+}
+
+.reminder-list::-webkit-scrollbar-thumb,
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.reminder-list::-webkit-scrollbar-thumb:hover,
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
 }
