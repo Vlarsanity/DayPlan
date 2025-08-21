@@ -1,214 +1,365 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>DayPlan - Smart Task Management</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A beautiful, responsive calendar-style todo application with native notifications">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="description" content="A beautiful, responsive calendar-style todo application with native notifications and smart reminders">
+  <meta name="keywords" content="todo, task management, calendar, productivity, reminders, notifications">
+  <meta name="author" content="DayPlan">
   <meta name="theme-color" content="#3b82f6">
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <meta name="color-scheme" content="light dark">
   
-  <!-- Add favicon for better notification icons -->
-  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzNiODJmNiIgcng9IjIwIi8+CiAgPHRleHQgeD0iNTAiIHk9IjYwIiBmb250LXNpemU9IjUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+8J+ThTwvdGV4dD4KICA8L3N2Zz4=" />
+  <!-- Open Graph / Social Media Meta Tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="DayPlan - Smart Task Management">
+  <meta property="og:description" content="Organize your tasks visually with our beautiful calendar-style todo application">
+  <meta property="og:image" content="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzNiODJmNiIgcng9IjIwIi8+CiAgPHRleHQgeD0iNTAiIHk9IjYwIiBmb250LXNpemU9IjUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+8J+ThTwvdGV4dD4KICA8L3N2Zz4=">
+  
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="DayPlan - Smart Task Management">
+  <meta name="twitter:description" content="Organize your tasks visually with our beautiful calendar-style todo application">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkRheVBsYW4gLSBTbWFydCBUYXNrIE1hbmFnZW1lbnQiLAogICJzaG9ydF9uYW1lIjogIkRheVBsYW4iLAogICJkZXNjcmlwdGlvbiI6ICJBIGJlYXV0aWZ1bCwgcmVzcG9uc2l2ZSBjYWxlbmRhci1zdHlsZSB0b2RvIGFwcGxpY2F0aW9uIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmOGZhZmMiLAogICJ0aGVtZV9jb2xvciI6ICIjM2I4MmY2IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M00zUnZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQXhNREFnTVRBd0lqNEtJQ0E4Y21WamRDQjNhV1IwYUQwaU1UQXdJaUJvWldsbmFIUTlJakV3TUNJZ1ptbHNiRDBpSTJJek9ESmtOaUlnY25nOUlqSXdJaTgrQ2lBZ1BIUmxlSFFnZUQwaU5UQWlJSGs5SWpZd0lpQm1iMjUwTFhOcGVtVTlJalV3SWlCMFpYaDBMV0Z1WTJodmNqMGliV2xrWkd4bElpQm1hV3hzUFNKM2FHbDBaU0krOEorVWhUd3ZkR1Y0ZEQ0S0lEd3ZjM1puUGc9PSIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M00zUnZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQXhNREFnTVRBd0lqNEtJQ0E4Y21WamRDQjNhV1IwYUQwaU1UQXdJaUJvWldsbmFIUTlJakV3TUNJZ1ptbHNiRDBpSTJJek9ESmtOaUlnY25nOUlqSXdJaTgrQ2lBZ1BIUmxlSFFnZUQwaU5UQWlJSGs5SWpZd0lpQm1iMjUwTFhOcGVtVTlJalV3SWlCMFpYaDBMV0Z1WTJodmNqMGliV2xrWkd4bElpQm1hV3hzUFNKM2FHbDBaU0krOEorVWhUd3ZkR1Y0ZEQ0S0lEd3ZjM1puUGc9PSIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdCn0=">
+  
+  <!-- Favicons -->
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzNiODJmNiIgcng9IjIwIi8+CiAgPHRleHQgeD0iNTAiIHk9IjYwIiBmb250LXNpemU9IjUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+8J+ThTwvdGV4dD4KICA8L3N2Zz4=" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzNiODJmNiIgcng9IjIwIi8+CiAgPHRleHQgeD0iNTAiIHk9IjYwIiBmb250LXNpemU9IjUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+8J+ThTwvdGV4dD4KICA8L3N2Zz4=">
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" href="assets/css/styles.css" as="style">
+  <link rel="preload" href="assets/js/app.js" as="script">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
-  <div class="container">
-    <!-- Enhanced Header with Notification Status -->
-    <div class="header">
+  <!-- Skip to main content for accessibility -->
+  <a href="#main-content" class="sr-only">Skip to main content</a>
+  
+  <div class="container" role="main" id="main-content">
+    <!-- Enhanced Header with better accessibility -->
+    <header class="header" role="banner">
       <h1>📅 DayPlan</h1>
-      <div class="header-controls">
-        <button class="reminder-toggle" onclick="toggleReminders()" title="Toggle task reminders and notifications">
-          <span id="reminderIcon">🔔</span> Reminders
+      <div class="header-controls" role="toolbar" aria-label="Application controls">
+        <button 
+          class="reminder-toggle" 
+          onclick="toggleReminders()" 
+          title="Toggle task reminders and notifications"
+          aria-label="Toggle reminders"
+          aria-pressed="false"
+          id="reminderToggleBtn">
+          <span id="reminderIcon" aria-hidden="true">🔔</span> 
+          <span>Reminders</span>
         </button>
-        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">🌓 Theme</button>
-        <div class="notification-status" id="notificationStatus" style="display: none;">
-          <span class="notification-indicator" id="notificationIndicator">🔕</span>
+        
+        <button 
+          class="theme-toggle" 
+          onclick="toggleTheme()" 
+          title="Toggle dark/light mode"
+          aria-label="Toggle theme"
+          id="themeToggleBtn">
+          <span aria-hidden="true">🌓</span> 
+          <span>Theme</span>
+        </button>
+        
+        <div 
+          class="notification-status" 
+          id="notificationStatus" 
+          role="status" 
+          aria-live="polite"
+          style="display: none;">
+          <span class="notification-indicator" id="notificationIndicator" aria-hidden="true">🔕</span>
           <small id="notificationText">Notifications Off</small>
         </div>
       </div>
-    </div>
+    </header>
 
-    <!-- Enhanced Reminder Panel -->
-    <div class="reminder-panel" id="reminderPanel">
-      <h3>🔔 Task Reminders & Notifications</h3>
-      <div class="reminder-list" id="reminderList">
+    <!-- Enhanced Reminder Panel with better structure -->
+    <section class="reminder-panel" id="reminderPanel" role="complementary" aria-labelledby="reminders-title">
+      <h3 id="reminders-title">🔔 Task Reminders & Notifications</h3>
+      <div class="reminder-list" id="reminderList" role="list" aria-live="polite">
         <!-- Reminders will be populated here -->
       </div>
-    </div>
+    </section>
 
-    <!-- Task Input Section -->
-    <div class="input-section">
-      <div class="input-row">
-        <div class="input-group">
-          <label for="taskTitle">Title</label>
-          <input type="text" id="taskTitle" placeholder="Task title" required>
+    <!-- Task Input Section with proper form structure -->
+    <section class="input-section" role="form" aria-labelledby="add-task-title">
+      <h2 id="add-task-title" class="sr-only">Add New Task</h2>
+      <form onsubmit="addTask(); return false;" novalidate>
+        <div class="input-row">
+          <div class="input-group">
+            <label for="taskTitle">Task Title *</label>
+            <input 
+              type="text" 
+              id="taskTitle" 
+              name="title"
+              placeholder="Enter task title" 
+              required 
+              aria-describedby="title-help"
+              autocomplete="off"
+              maxlength="100">
+            <small id="title-help" class="input-helper">Brief description of your task</small>
+          </div>
+          
+          <div class="input-group">
+            <label for="taskBody">Description *</label>
+            <input 
+              type="text" 
+              id="taskBody" 
+              name="description"
+              placeholder="What do you need to do?" 
+              required 
+              aria-describedby="body-help"
+              autocomplete="off"
+              maxlength="500">
+            <small id="body-help" class="input-helper">Detailed description of the task</small>
+          </div>
+          
+          <div class="input-group">
+            <label for="taskDueDate">Due Date</label>
+            <input 
+              type="date" 
+              id="taskDueDate" 
+              name="dueDate"
+              aria-describedby="date-helper">
+            <small id="date-helper" class="input-helper">Optional: Set a due date</small>
+          </div>
+          
+          <div class="input-group">
+            <label for="taskPriority">Priority Level</label>
+            <select id="taskPriority" name="priority" aria-describedby="priority-helper">
+              <option value="low">🟢 Low Priority</option>
+              <option value="medium">🟡 Medium Priority</option>
+              <option value="high">🔴 High Priority</option>
+            </select>
+            <small id="priority-helper" class="input-helper">Choose task importance</small>
+          </div>
+          
+          <div class="input-group">
+            <label for="taskCategory">Category</label>
+            <select id="taskCategory" name="category" aria-describedby="category-helper">
+              <option value="personal">👤 Personal</option>
+              <option value="work">💼 Work</option>
+              <option value="shopping">🛒 Shopping</option>
+              <option value="health">🏥 Health</option>
+              <option value="other">📂 Other</option>
+            </select>
+            <small id="category-helper" class="input-helper">Organize by category</small>
+          </div>
+          
+          <button type="submit" title="Add new task to calendar" aria-describedby="add-task-help">
+            ➕ Add Task
+          </button>
+          <small id="add-task-help" class="sr-only">Press Enter or click to add task</small>
+          
+          <button 
+            type="button"
+            class="btn-danger" 
+            onclick="clearAll()" 
+            title="Delete all tasks permanently"
+            aria-describedby="clear-all-warning">
+            🗑️ Clear All
+          </button>
+          <small id="clear-all-warning" class="sr-only">This will permanently delete all tasks</small>
         </div>
-        <div class="input-group">
-          <label for="taskBody">Description</label>
-          <input type="text" id="taskBody" placeholder="What do you need to do?" required>
-        </div>
-        <div class="input-group">
-          <label for="taskDueDate">Due Date</label>
-          <input type="date" id="taskDueDate" required>
-        </div>
-        <div class="input-group">
-          <label for="taskPriority">Priority</label>
-          <select id="taskPriority">
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label for="taskCategory">Category</label>
-          <select id="taskCategory">
-            <option value="personal">Personal</option>
-            <option value="work">Work</option>
-            <option value="shopping">Shopping</option>
-            <option value="health">Health</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <button onclick="addTask()" title="Add new task">Add Task</button>
-        <button class="btn-danger" onclick="clearAll()" title="Delete all tasks">Clear All</button>
-      </div>
-    </div>
+      </form>
+    </section>
 
-    <!-- Filter Section -->
-    <div class="filter-section">
-      <h3>🔍 Filter & Sort Tasks</h3>
-      <div class="filter-row">
+    <!-- Enhanced Filter Section -->
+    <section class="filter-section" role="search" aria-labelledby="filter-title">
+      <h3 id="filter-title">🔍 Filter & Sort Tasks</h3>
+      <div class="filter-row" role="group" aria-label="Task filters">
         <div class="filter-group">
-          <label for="statusFilter">Status</label>
-          <select id="statusFilter" onchange="renderCalendar()">
+          <label for="statusFilter">Filter by Status</label>
+          <select id="statusFilter" onchange="renderCalendar()" aria-describedby="status-help">
             <option value="all">All Tasks</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
+            <option value="pending">⏳ Pending Only</option>
+            <option value="completed">✅ Completed Only</option>
           </select>
+          <small id="status-help" class="input-helper">Show tasks by completion status</small>
         </div>
+        
         <div class="filter-group">
-          <label for="priorityFilter">Priority</label>
-          <select id="priorityFilter" onchange="renderCalendar()">
+          <label for="priorityFilter">Filter by Priority</label>
+          <select id="priorityFilter" onchange="renderCalendar()" aria-describedby="priority-filter-help">
             <option value="all">All Priorities</option>
-            <option value="high">High Priority</option>
-            <option value="medium">Medium Priority</option>
-            <option value="low">Low Priority</option>
+            <option value="high">🔴 High Priority Only</option>
+            <option value="medium">🟡 Medium Priority Only</option>
+            <option value="low">🟢 Low Priority Only</option>
           </select>
+          <small id="priority-filter-help" class="input-helper">Filter by task importance</small>
         </div>
+        
         <div class="filter-group">
-          <label for="categoryFilter">Category</label>
-          <select id="categoryFilter" onchange="renderCalendar()">
+          <label for="categoryFilter">Filter by Category</label>
+          <select id="categoryFilter" onchange="renderCalendar()" aria-describedby="category-filter-help">
             <option value="all">All Categories</option>
-            <option value="personal">Personal</option>
-            <option value="work">Work</option>
-            <option value="shopping">Shopping</option>
-            <option value="health">Health</option>
-            <option value="other">Other</option>
+            <option value="personal">👤 Personal</option>
+            <option value="work">💼 Work</option>
+            <option value="shopping">🛒 Shopping</option>
+            <option value="health">🏥 Health</option>
+            <option value="other">📂 Other</option>
           </select>
+          <small id="category-filter-help" class="input-helper">Group by task category</small>
         </div>
-        <button class="clear-filters-btn" onclick="clearFilters()" title="Reset all filters">Clear Filters</button>
+        
+        <button 
+          class="clear-filters-btn" 
+          onclick="clearFilters()" 
+          title="Reset all filters to show all tasks"
+          aria-describedby="clear-filter-help">
+          🔄 Clear Filters
+        </button>
+        <small id="clear-filter-help" class="sr-only">Reset all filters to default state</small>
       </div>
-    </div>
+    </section>
 
-    <!-- Calendar Navigation -->
-    <div class="calendar-nav">
-      <div class="nav-buttons">
-        <button onclick="previousMonth()" title="Go to previous month">← Previous</button>
-        <button class="today-btn" onclick="goToToday()" title="Go to current month">Today</button>
-        <button onclick="nextMonth()" title="Go to next month">Next →</button>
+    <!-- Enhanced Calendar Navigation -->
+    <nav class="calendar-nav" role="navigation" aria-labelledby="calendar-nav-title">
+      <h2 id="calendar-nav-title" class="sr-only">Calendar Navigation</h2>
+      <div class="nav-buttons" role="group" aria-label="Month navigation">
+        <button 
+          onclick="previousMonth()" 
+          title="Go to previous month"
+          aria-label="Previous month">
+          ← Previous
+        </button>
+        <button 
+          class="today-btn" 
+          onclick="goToToday()" 
+          title="Go to current month"
+          aria-label="Go to today's month">
+          📅 Today
+        </button>
+        <button 
+          onclick="nextMonth()" 
+          title="Go to next month"
+          aria-label="Next month">
+          Next →
+        </button>
       </div>
-      <h2 id="currentMonth"></h2>
-    </div>
+      <h2 id="currentMonth" role="heading" aria-level="2" aria-live="polite">
+        <!-- Current month will be displayed here -->
+      </h2>
+    </nav>
 
-    <!-- Calendar -->
-    <div class="calendar">
-      <div class="calendar-header">
-        <div class="day-header">Sun</div>
-        <div class="day-header">Mon</div>
-        <div class="day-header">Tue</div>
-        <div class="day-header">Wed</div>
-        <div class="day-header">Thu</div>
-        <div class="day-header">Fri</div>
-        <div class="day-header">Sat</div>
+    <!-- Enhanced Calendar with ARIA support -->
+    <main class="calendar" role="application" aria-labelledby="calendar-title" aria-describedby="calendar-instructions">
+      <h2 id="calendar-title" class="sr-only">Task Calendar</h2>
+      <div id="calendar-instructions" class="sr-only">
+        Use arrow keys to navigate calendar days. Press Enter or Space to select a date for adding tasks. 
+        Each day shows tasks with color coding: red for high priority, yellow for medium, green for low priority.
       </div>
-      <div class="calendar-body" id="calendarBody">
+      
+      <div class="calendar-header" role="row" aria-label="Days of the week">
+        <div class="day-header" role="columnheader" aria-label="Sunday">Sun</div>
+        <div class="day-header" role="columnheader" aria-label="Monday">Mon</div>
+        <div class="day-header" role="columnheader" aria-label="Tuesday">Tue</div>
+        <div class="day-header" role="columnheader" aria-label="Wednesday">Wed</div>
+        <div class="day-header" role="columnheader" aria-label="Thursday">Thu</div>
+        <div class="day-header" role="columnheader" aria-label="Friday">Fri</div>
+        <div class="day-header" role="columnheader" aria-label="Saturday">Sat</div>
+      </div>
+      
+      <div 
+        class="calendar-body" 
+        id="calendarBody" 
+        role="grid" 
+        aria-label="Calendar days with tasks"
+        tabindex="0">
         <!-- Calendar days will be generated here -->
       </div>
-    </div>
+    </main>
 
-    <!-- Enhanced Stats -->
-    <div class="stats">
-      <div class="stats-grid">
-        <div class="stat-item total-count">
-          <div class="stat-number" id="totalCount">0</div>
-          <div class="stat-label">Total Tasks</div>
+    <!-- Enhanced Stats with better accessibility -->
+    <section class="stats" role="complementary" aria-labelledby="stats-title">
+      <h3 id="stats-title">📊 Task Statistics</h3>
+      <div class="stats-grid" role="group" aria-label="Task statistics">
+        <div class="stat-item total-count" role="text">
+          <div class="stat-number" id="totalCount" aria-describedby="total-label">0</div>
+          <div class="stat-label" id="total-label">Total Tasks</div>
         </div>
-        <div class="stat-item completed-count">
-          <div class="stat-number" id="completedCount">0</div>
-          <div class="stat-label">Completed</div>
+        <div class="stat-item completed-count" role="text">
+          <div class="stat-number" id="completedCount" aria-describedby="completed-label">0</div>
+          <div class="stat-label" id="completed-label">Completed</div>
         </div>
-        <div class="stat-item pending-count">
-          <div class="stat-number" id="pendingCount">0</div>
-          <div class="stat-label">Pending</div>
+        <div class="stat-item pending-count" role="text">
+          <div class="stat-number" id="pendingCount" aria-describedby="pending-label">0</div>
+          <div class="stat-label" id="pending-label">Pending</div>
         </div>
-        <div class="stat-item overdue-stat">
-          <div class="stat-number" id="overdueCount">0</div>
-          <div class="stat-label">Overdue</div>
+        <div class="stat-item overdue-stat" role="text">
+          <div class="stat-number" id="overdueCount" aria-describedby="overdue-label">0</div>
+          <div class="stat-label" id="overdue-label">Overdue</div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 
   <!-- Enhanced Toast Container -->
-  <div class="toast-container" id="toastContainer"></div>
+  <div 
+    class="toast-container" 
+    id="toastContainer" 
+    role="region" 
+    aria-label="Notifications"
+    aria-live="polite">
+  </div>
 
   <!-- Enhanced Task Detail Modal -->
-  <div class="modal" id="taskModal">
+  <div 
+    class="modal" 
+    id="taskModal" 
+    role="dialog" 
+    aria-modal="true" 
+    aria-labelledby="modal-title"
+    aria-describedby="modal-description">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title">Task Details</h3>
-        <button class="close-modal" onclick="closeModal()" title="Close modal">&times;</button>
+        <h3 class="modal-title" id="modal-title">Task Details</h3>
+        <button 
+          class="close-modal" 
+          onclick="closeModal()" 
+          title="Close modal"
+          aria-label="Close task details">
+          &times;
+        </button>
       </div>
-      <div id="modalBody">
+      <div id="modalBody" role="document">
         <!-- Task details will be inserted here -->
       </div>
     </div>
   </div>
 
-  <!-- Include the enhanced JavaScript -->
+  <!-- JavaScript -->
   <script src="assets/js/app.js"></script>
 
-  <!-- Add some inline JavaScript for notification status updates -->
-  <script>
-    // Update notification status indicator
-    function updateNotificationStatus() {
-      const statusElement = document.getElementById('notificationStatus');
-      const indicatorElement = document.getElementById('notificationIndicator');
-      const textElement = document.getElementById('notificationText');
-      const reminderIcon = document.getElementById('reminderIcon');
-      
-      if (remindersEnabled) {
-        statusElement.style.display = 'flex';
-        
-        if (notificationsEnabled && Notification.permission === 'granted') {
-          statusElement.classList.add('enabled');
-          indicatorElement.textContent = '🔔';
-          textElement.textContent = 'Notifications On';
-          reminderIcon.textContent = '🔔';
-        } else {
-          statusElement.classList.remove('enabled');
-          indicatorElement.textContent = '🔕';
-          textElement.textContent = 'In-App Only';
-          reminderIcon.textContent = '🔕';
-        }
-      } else {
-        statusElement.style.display = 'none';
-        reminderIcon.textContent = '🔔';
-      }
-    }
-    
-    // Call this function whenever notification settings change
-    // This will be called from the main app.js functions
+  <!-- Schema.org structured data for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "DayPlan",
+    "description": "A beautiful, responsive calendar-style todo application with native notifications and smart reminders",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "Calendar-based task management",
+      "Native browser notifications",
+      "Dark/Light theme support",
+      "Mobile responsive design",
+      "Offline capability",
+      "Task prioritization",
+      "Category organization",
+      "Due date reminders"
+    ]
+  }
   </script>
 </body>
 </html>
