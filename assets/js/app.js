@@ -30,6 +30,30 @@ function initializeNotifications() {
     notificationsEnabled = false;
     localStorage.setItem('notificationsEnabled', 'false');
   }
+  
+  // Update notification status display
+  updateNotificationStatus();
+}
+
+// FIXED: Update notification status display
+function updateNotificationStatus() {
+  const statusDiv = document.getElementById('notificationStatus');
+  const indicator = document.getElementById('notificationIndicator');
+  const text = document.getElementById('notificationText');
+  
+  if (statusDiv && indicator && text) {
+    statusDiv.style.display = 'flex';
+    
+    if (notificationsEnabled && Notification.permission === 'granted') {
+      statusDiv.className = 'notification-status enabled';
+      indicator.textContent = '🔔';
+      text.textContent = 'Notifications On';
+    } else {
+      statusDiv.className = 'notification-status disabled';
+      indicator.textContent = '🔕';
+      text.textContent = 'Notifications Off';
+    }
+  }
 }
 
 // Request notification permission
@@ -65,25 +89,18 @@ async function requestNotificationPermission() {
   }
 }
 
-// Send native device notification
+// FIXED: Send native device notification with proper icon encoding
 function sendNativeNotification(title, message, taskId = null, options = {}) {
   if (!notificationsEnabled || Notification.permission !== 'granted') {
     return;
   }
 
+  // FIXED: Use simple SVG without emoji characters for btoa compatibility
+  const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#3b82f6" rx="20"/><text x="50" y="70" font-size="40" font-family="Arial" text-anchor="middle" fill="white">Cal</text></svg>';
+  
   const defaultOptions = {
-    icon: 'data:image/svg+xml;base64,' + btoa(`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-        <rect width="100" height="100" fill="#3b82f6" rx="20"/>
-        <text x="50" y="60" font-size="50" text-anchor="middle" fill="white">📅</text>
-      </svg>
-    `),
-    badge: 'data:image/svg+xml;base64,' + btoa(`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
-        <circle cx="25" cy="25" r="25" fill="#3b82f6"/>
-        <text x="25" y="35" font-size="25" text-anchor="middle" fill="white">📅</text>
-      </svg>
-    `),
+    icon: 'data:image/svg+xml;base64,' + btoa(iconSvg),
+    badge: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><circle cx="25" cy="25" r="25" fill="#3b82f6"/><text x="25" y="35" font-size="25" font-family="Arial" text-anchor="middle" fill="white">D</text></svg>'),
     tag: taskId ? `task-${taskId}` : `reminder-${Date.now()}`,
     requireInteraction: false,
     silent: false,
@@ -118,6 +135,8 @@ function sendNativeNotification(title, message, taskId = null, options = {}) {
 
   } catch (error) {
     console.error('Failed to send notification:', error);
+    // Fallback to toast notification
+    showToast(title, message, 'info', 5000);
   }
 }
 
@@ -236,7 +255,7 @@ async function toggleReminders() {
       
       // Send a test notification
       sendNativeNotification(
-        '🔔 DayPlan Notifications Active',
+        'DayPlan Notifications Active',
         'You will now receive reminders for upcoming and overdue tasks',
         null,
         { requireInteraction: false }
@@ -251,6 +270,9 @@ async function toggleReminders() {
     localStorage.setItem('notificationsEnabled', 'false');
     showToast('Reminders Disabled', 'All reminders have been turned off', 'info', 3000);
   }
+  
+  // Update notification status display
+  updateNotificationStatus();
 }
 
 // Enhanced check for tasks that need reminders
@@ -332,13 +354,13 @@ function checkReminders() {
       
       if (overdueCount > 0) {
         // In-app toast
-        showToast('⚠️ Overdue Tasks!', 
+        showToast('Overdue Tasks!', 
           `You have ${overdueCount} overdue task${overdueCount > 1 ? 's' : ''}`, 
           'error', 6000);
         
         // Native notification
         sendNativeNotification(
-          '⚠️ Overdue Tasks!',
+          'Overdue Tasks!',
           `You have ${overdueCount} overdue task${overdueCount > 1 ? 's' : ''} that need attention`,
           null,
           { requireInteraction: true }
@@ -347,13 +369,13 @@ function checkReminders() {
       
       if (tomorrowCount > 0) {
         // In-app toast
-        showToast('📅 Tasks Due Tomorrow', 
+        showToast('Tasks Due Tomorrow', 
           `${tomorrowCount} task${tomorrowCount > 1 ? 's' : ''} due tomorrow`, 
           'warning', 5000);
         
         // Native notification
         sendNativeNotification(
-          '📅 Tasks Due Tomorrow',
+          'Tasks Due Tomorrow',
           `${tomorrowCount} task${tomorrowCount > 1 ? 's' : ''} due tomorrow - don't forget!`,
           null,
           { requireInteraction: false }
@@ -651,7 +673,7 @@ function addTask() {
     
     if (daysDiff <= 1 && priority === 'high') {
       sendNativeNotification(
-        '🚨 Urgent Task Added!',
+        'Urgent Task Added!',
         `High priority task "${titleText}" is due ${daysDiff === 0 ? 'today' : 'tomorrow'}`,
         newTask.id,
         { requireInteraction: true }
@@ -836,7 +858,7 @@ function toggleComplete(taskId) {
       // Send celebration notification for completed high-priority tasks
       if (task.priority === 'high' && notificationsEnabled) {
         sendNativeNotification(
-          '🎉 High Priority Task Completed!',
+          'High Priority Task Completed!',
           `Great job completing "${task.title}"!`,
           task.id,
           { requireInteraction: false }
